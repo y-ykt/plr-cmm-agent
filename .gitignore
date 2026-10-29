@@ -1,0 +1,8 @@
+# Extracted text, notes and judgments quote the input records; they never enter git.
+work/
+runs/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store

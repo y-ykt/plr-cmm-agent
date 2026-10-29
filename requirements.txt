@@ -1,0 +1,8 @@
+pyyaml
+openpyxl
+python-docx
+python-pptx
+pymupdf
+pytest
+mcp
+anthropic

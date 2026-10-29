@@ -1,0 +1,109 @@
+# PLR-CMM assessment agent: input location and exclusion rules.
+# The input records (the operational records of the studies) are never copied into this repository.
+# The folder and file names below are an example. Keep a config.yaml that matches your own records
+# outside the repository and point PLR_CMM_CONFIG at it.
+
+input_root: /path/to/records
+experiments_dir: 実験別フォルダ
+
+# Top-level files to use (exact names after NFC normalization).
+top_files:
+  - "2026_0101 実験一覧 .xlsx"
+  - "2026_0101_実験俯瞰図ver2.pptx"
+
+# The summary workbook among the top files: a glob on the name of its extracted text, and the sheet
+# that has one row per experiment. A row belongs to a study when it starts with the digits that the
+# study's folder name starts with (folder "012_name" -> rows starting "012 |"); a study whose folder
+# name does not start with digits gets no rows. Leave both empty if folder names can start with
+# digits that are not the row numbers of this sheet.
+summary_file_glob: "*一覧*.xlsx.txt"
+summary_sheet: "一覧表"
+
+# Sub-folders of each experiment folder to use (prefix match on the relative path).
+use_subfolders:
+  - "1．計画"
+  - "2. データ"
+  - "4. 結果/4-1 成果"
+  - "4. 結果/4-3 補足"
+
+# Sub-folders excluded as a whole, with the reason recorded in the inventory.
+exclude_subfolders:
+  "3. 個人別": "participant-level records"
+  "4. 結果/4-2 調査票": "questionnaire answers may be per person"
+  "予行": "rehearsal data"
+
+# Experiment-level folders that are not experiments.
+exclude_experiment_dirs:
+  - "旧"
+  - "参考"
+
+# File name fragments that mark records to exclude (any path component).
+exclude_name_fragments:
+  - 名簿
+  - 参加者
+  - 被験者
+  - 同意書
+  - 本人確認
+  - 当日記録
+  - ログイン履歴
+  - 見積書
+  - 請求書
+
+# Extensions that are read as documents.
+use_extensions:
+  - .docx
+  - .pptx
+  - .xlsx
+  - .pdf
+  - .txt
+  - .md
+
+# Where extracted text and run outputs go (git-ignored).
+work_dir: work
+runs_dir: runs
+
+# How the batch orchestrator (agents/orchestrator.py) calls the model.
+# With api_key, the Claude API is called directly (python package anthropic).
+# Without it, the Claude Code command (claude -p) is used. Do not commit a key: keep a config.yaml
+# that holds one outside the repository and point PLR_CMM_CONFIG at it.
+llm:
+  api_key: ""                 # the Anthropic API key; empty = use claude -p
+  model: claude-opus-5-5      # the environment variable PLR_CMM_MODEL overrides it
+  effort: high                # API only: low | medium | high | xhigh | max
+  fallbacks: true             # API only: let a request the model declines run on a fallback model
+  prices: {}                  # API only, optional: USD per million tokens, for the cost column of the log,
+                              #   e.g. {input: 4, output: 20, cache_read: 0.2, cache_create: 5}
+
+# The vocabulary of the notes written per file in the reading stage: what submit_notes accepts
+# (validated by notes.py). topics_ja are the topic names of the earlier reading instructions,
+# still accepted in notes written with them and mapped to English on output.
+notes:
+  topics:
+    - Purpose and data
+    - Stakeholders and roles
+    - Consent method
+    - Review, governance and security
+    - Transactions, compensation and return of outcomes
+    - Participation support and proxy
+    - Systems, migration and interoperability
+    - Results and operation
+    - Other
+  topics_ja:
+    目的とデータ: Purpose and data
+    関係者と役割: Stakeholders and roles
+    同意の取り方: Consent method
+    審査と統治とセキュリティ: Review, governance and security
+    取引と対価と成果の還元: Transactions, compensation and return of outcomes
+    参加の支援と代理: Participation support and proxy
+    システムと移行と接続: Systems, migration and interoperability
+    結果と運用: Results and operation
+    その他: Other
+
+# The vocabulary of a judgment: what submit_judgment accepts (validated by judge.py).
+# capabilities and levels follow resources/capabilities.md and resources/levels.md.
+judgment:
+  capabilities: [C1-1, C1-2, C1-3, C2-1, C2-2, C2-3, C3-1, C3-2, C3-3, C4-1, C4-2, C4-3, C5-1, C5-2, C5-3, C5-4]
+  statuses: [achieved, partial, none, premise]
+  shown: [achieved, partial]      # statuses that count as "shown by this study"
+  levels: [L1, L2, L3, L4, L5]
+  variables: [Trustee, Purpose, Trust]
